@@ -45,6 +45,7 @@
     "tabCapture",
     "tabs",
     "<all_urls>",
-    "webNavigation"
+    "webNavigation",
+    "storage"
   ]
 }
