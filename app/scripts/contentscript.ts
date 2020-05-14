@@ -113,6 +113,11 @@ function processExp(exp: HTMLCollectionOf<Element>) {
               const duration = subPosition[subKey]
                 .getElementsByTagName("h4")[0]
                 .innerText.replace("Dates Employed", "")
+                .replace(
+                  '<span class="visually-hidden">Dates Employed</span>',
+                  ""
+                )
+                .replace("</span>", "")
                 .trim();
               if (duration) positionDetail.duration = duration;
               experienceDetail.company.item[subKey] = positionDetail;
@@ -151,7 +156,11 @@ function processExp(exp: HTMLCollectionOf<Element>) {
               .replace("</span>", ""),
           };
         if (position) experienceDetail.company.position = position;
-        if (date) experienceDetail.company.date = date;
+        if (date)
+          experienceDetail.company.date = date
+            .trim()
+            .replace('<span class="visually-hidden">Dates Employed</span>', "")
+            .replace("</span>", "");
         console.log("detail", experienceDetail);
         experiences.push(experienceDetail);
       }
