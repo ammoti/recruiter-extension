@@ -1,20 +1,3 @@
-// Enable chromereload by uncommenting this line:
-// import 'chromereload/devonly'
-
-console.log(`'Allo 'Allo! Popup`);
-// Update the relevant fields with the new data.
-
-// chrome.runtime.onConnect.addListener(function (port) {
-//   console.assert(port.name === "knockknock");
-//   port.onMessage.addListener(function (msg) {
-//     if (msg.joke === "Knock knock")
-//       port.postMessage({ question: "Who's there?" });
-//     else if (msg.answer === "Madame")
-//       port.postMessage({ question: "Madame who?" });
-//     else if (msg.answer === "Madame... Boconsty")
-//       port.postMessage({ question: "I don't get it." });
-//   });
-// });
 let profileInfo: any;
 const setDOMInfo = (info: any) => {
   profileInfo = info;
@@ -24,7 +7,6 @@ const setDOMInfo = (info: any) => {
   const imgUrl = document.getElementById("imgUrl");
   const about = document.getElementById("about");
   const experiences = document.getElementById("experiences");
-  console.log("info", info);
   if (info.name && name) name.innerText = info.name;
   if (info.title && title) title.innerText = info.title;
   if (info.location && location) location.innerText = info.location;
@@ -97,6 +79,8 @@ window.addEventListener("DOMContentLoaded", () => {
   if (addProfile) {
     addProfile.addEventListener("click", function () {
       addLocal(profileInfo);
+      const ok = document.getElementById("ok");
+      if (ok) ok.style.visibility = "visible";
     });
   }
   // ...query for the active tab...
@@ -124,7 +108,6 @@ function exportCSV() {
 }
 
 function JSONToCSVConvertor(JSONData: any, ReportTitle: any, ShowLabel: any) {
-  console.log("JSONDATA", JSONData);
   const array = typeof JSONData !== "object" ? JSON.parse(JSONData) : JSONData;
   let str = "";
   let line = "";
@@ -134,6 +117,8 @@ function JSONToCSVConvertor(JSONData: any, ReportTitle: any, ShowLabel: any) {
     line = "";
     experienceCount = 1;
     skillsCount = 1;
+    let experienceLine = "";
+    let skillLine = "";
     for (const item in array[0][key]) {
       if (array[0][key].hasOwnProperty(item)) {
         const value = array[0][key][item];
@@ -175,35 +160,60 @@ function JSONToCSVConvertor(JSONData: any, ReportTitle: any, ShowLabel: any) {
             }
             break;
           case "experiences":
+            experienceLine = '"';
             for (let exp = 0; exp < value.length; exp++) {
+              let expDetail = "";
               const element = value[exp];
-              if (element)
-                line +=
-                  element.company.name
-                    .trim()
-                    .replace(/(\r\n|\n|\r)/gm, " ")
-                    .replace("Company Name", "")
-                    .replace(/,/g, "")
-                    .replace("<!---->", "") + "\n";
-              line += ",,,,";
+              if (element) {
+                if (element.company.name) expDetail += element.company.name;
+                if (element.company.position)
+                  expDetail +=
+                    " " +
+                    element.company.position
+                      .replace(
+                        '<span class=pv-entity__secondary-title separator">',
+                        ""
+                      )
+                      .replace("</span>", "");
+                if (element.company.date) {
+                  expDetail +=
+                    " " +
+                    element.company.date
+                      .replace(
+                        '<span class="visually-hidden">Dates Employed</span>',
+                        ""
+                      )
+                      .replace("<span>", "")
+                      .replace("</span>", "");
+                  console.log(`data`, element.company.date);
+                }
+              }
+              experienceLine +=
+                expDetail
+                  .trim()
+                  .replace(/(\r\n|\n|\r)/gm, " ")
+                  .replace("Company Name", "")
+                  .replace(/,/g, "")
+                  .replace("<!---->", "") + "\r";
             }
+            line += experienceLine + '"';
             experienceCount = value.length;
             break;
           case "skills":
+            skillLine = '"';
             for (let exp = 0; exp < value.length; exp++) {
               const element = value[exp];
               if (element) {
-                line +=
+                skillLine +=
                   element
                     .trim()
                     .replace(/(\r\n|\n|\r)/gm, " ")
-                    .replace("Company Name", "")
                     .replace(/,/g, "")
-                    .replace("<!---->", "") + "\n";
+                    .replace("<!---->", "") + "\r";
               }
-              line += ",,,,,";
-              skillsCount = value.length;
             }
+            line += skillLine + '"';
+            skillsCount = value.length;
             break;
           default:
             break;
@@ -212,46 +222,20 @@ function JSONToCSVConvertor(JSONData: any, ReportTitle: any, ShowLabel: any) {
       }
     }
     line.slice(0, line.length - 1);
-    if (experienceCount < skillsCount) experienceCount = skillsCount;
-    for (let b = 0; b < experienceCount; b++) {
-      line += "\r\n";
-    }
+    line += "\r\n";
     str += line;
     line = "";
   }
-  console.log("final", str);
   // Generate a file name
   let fileName = "MyReport_";
   // this will remove the blank-spaces from the title and replace it with an underscore
-  fileName += ReportTitle.replace(/ /g, "_");
-
-  // Initialize file format you want csv or xls
-  const uri = "data:text/csv;charset=UTF-8," + escape(str);
-
-  // Now the little tricky part.
-  // you can use either>> window.open(uri);
-  // but this will not work in some browsers
-  // or you will not get the correct file extension
-
-  // this trick will generate a temp <a /> tag
-  let link = document.createElement("a");
-  link.href = uri;
-
-  // set the visibility hidden so it will not effect on your web-layout
-  // link.style = "visibility:hidden";
-  link.download = fileName + ".csv";
-
-  // this part will append the anchor tag and remove it after automatic click
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
+  fileName += ReportTitle.replace(/ /g, "_") + ".csv";
+  downloadFile(str, fileName);
 }
 function addLocal(info: any) {
-  console.log("get item", local.get("profileList"));
   let profileList: string[] = local.get("profileList");
   profileList.push(info);
   local.set("profileList", profileList);
-  console.log(profileList);
 }
 const local = (function () {
   const setData = function (key: any, obj: any) {
@@ -283,3 +267,23 @@ const local = (function () {
 
   return { set: setData, get: getData, update: updateDate };
 })();
+function downloadFile(data: any, fileName: any) {
+  const csvData = data;
+  const blob = new Blob([csvData], {
+    type: "application/csv;charset=utf-8;",
+  });
+
+  if (window.navigator.msSaveBlob) {
+    // FOR IE BROWSER
+    navigator.msSaveBlob(blob, fileName);
+  } else {
+    // FOR OTHER BROWSERS
+    const link = document.createElement("a");
+    const csvUrl = URL.createObjectURL(blob);
+    link.href = csvUrl;
+    link.download = fileName;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  }
+}

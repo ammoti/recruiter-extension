@@ -1,15 +1,10 @@
 // Enable chromereload by uncommenting this line:
 // import 'chromereload/devonly'
 
-console.log(`'Allo 'Allo! Content script`);
-
 chrome.runtime.sendMessage({
   from: "content",
   subject: "showPageAction",
 });
-
-// document.addEventListener("wheel", whellActivated);
-
 // Listen for messages from the popup.
 chrome.runtime.onMessage.addListener((msg, sender, response) => {
   // First, validate the message's structure.
@@ -73,9 +68,9 @@ chrome.runtime.onMessage.addListener((msg, sender, response) => {
       experiences: expInfo,
       skills: processSkill(skills),
     };
-    console.log(domInfo);
     // Directly respond to the sender (popup),
     // through the specified callback.
+    console.log("dom inf", domInfo);
     response(domInfo);
   }
 });
@@ -95,7 +90,17 @@ function processExp(exp: HTMLCollectionOf<Element>) {
         );
         const experienceDetail: any = {};
         if (company) {
-          experienceDetail.company = { name: company, item: {} };
+          experienceDetail.company = {
+            name: company
+              .trim()
+              .replace(/(\r\n|\n|\r)/gm, " ")
+              .replace(
+                '<span class="pv-entity__secondary-title separator">',
+                "-"
+              )
+              .replace("</span>", ""),
+            item: {},
+          };
           const subPosition = element.getElementsByTagName("li");
           for (const subKey in subPosition) {
             const positionDetail: any = {};
@@ -133,9 +138,21 @@ function processExp(exp: HTMLCollectionOf<Element>) {
           true
         );
         const experienceDetail: any = {};
-        if (company) experienceDetail.company = { name: company };
+        if (company)
+          experienceDetail.company = {
+            name: company
+              .trim()
+              .replace(/(\r\n|\n|\r)/gm, " ")
+              .replace("</span>", "")
+              .replace(
+                '<span class="pv-entity__secondary-title separator">',
+                "-"
+              )
+              .replace("</span>", ""),
+          };
         if (position) experienceDetail.company.position = position;
         if (date) experienceDetail.company.date = date;
+        console.log("detail", experienceDetail);
         experiences.push(experienceDetail);
       }
     }
@@ -158,6 +175,7 @@ function whellActivated() {
   if (!isExpanded) {
     if (window.innerHeight + window.scrollY >= document.body.offsetHeight) {
       console.log("you're at the bottom of the page");
+
       // show loading spinner and make fetch request to api
       const moreExperiences = document.getElementsByClassName(
         "pv-profile-section__see-more-inline pv-profile-section__text-truncate-toggle link link-without-hover-state"
@@ -173,13 +191,13 @@ function whellActivated() {
         if (skills.innerText.toLocaleLowerCase().search("more") !== -1)
           skills.click();
       }
-      // chrome.runtime.sendMessage(
-      //   {
-      //     from: "content",
-      //     subject: "changeBadge",
-      //   },
-      //   log
-      // );
+      chrome.runtime.sendMessage(
+        {
+          from: "content",
+          subject: "changeBadge",
+        },
+        log
+      );
     }
   }
 }

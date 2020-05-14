@@ -1,8 +1,8 @@
 {
-  "name": "ext",
+  "name": "linkedin-extractor",
   "private": true,
-  "version": "0.0.0",
-  "description": "Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+  "version": "0.0.2",
+  "description": "You can export all visited profile in linkedin super basic",
   "scripts": {
     "start": "npm run dev:chrome",
     "build": "npm run build:chrome",

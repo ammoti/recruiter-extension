@@ -1,8 +1,8 @@
 {
-  "name": "__MSG_appName__",
-  "short_name": "__MSG_appShortName__",
-  "description": "__MSG_appDescription__",
-  "version": "0.0.0",
+  "name": "linkedin-extractor",
+  "short_name": "linkedin-extractor",
+  "description": "You can export all visited profile in linkedin super basic",
+  "version": "0.0.2",
   "manifest_version": 2,
   "default_locale": "en",
   "offline_enabled": true,
@@ -34,7 +34,7 @@
     {
       "matches": ["<all_urls>"],
       "css": ["styles/contentscript.css"],
-      "js": ["scripts/jquery.min.js", "scripts/contentscript.js"],
+      "js": ["scripts/contentscript.js"],
       "run_at": "document_idle",
       "all_frames": false
     }
@@ -46,6 +46,7 @@
     "tabs",
     "<all_urls>",
     "webNavigation",
-    "storage"
+    "storage",
+    "downloads"
   ]
 }
