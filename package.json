@@ -56,8 +56,8 @@
     "tslint": "^6.x.x",
     "typescript": "^3.x.x",
     "vinyl-named": "1.x.x",
-    "webpack": "4.x.x",
-    "webpack-stream": "5.x.x",
+    "webpack": "5.x.x",
+    "webpack-stream": "7.x.x",
     "yargs": "15.x.x"
   },
   "dependencies": {
